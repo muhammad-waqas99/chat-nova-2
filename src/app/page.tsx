@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { socket } from "@/lib/socket";
 
 interface User {
   _id: string;
@@ -35,6 +36,34 @@ export default function Home() {
   const [messageText, setMessageText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+
+  useEffect(() => {
+  function handleConnect() {
+    console.log("Connected to Socket.IO:", socket.id);
+  }
+
+  function handleDisconnect(reason: string) {
+    console.log("Socket disconnected:", reason);
+  }
+
+  function handleConnectError(error: Error) {
+    console.error("Socket connection error:", error.message);
+  }
+
+  socket.on("connect", handleConnect);
+  socket.on("disconnect", handleDisconnect);
+  socket.on("connect_error", handleConnectError);
+
+  socket.connect();
+
+  return () => {
+    socket.off("connect", handleConnect);
+    socket.off("disconnect", handleDisconnect);
+    socket.off("connect_error", handleConnectError);
+
+    socket.disconnect();
+  };
+}, []);
 
   useEffect(() => {
     async function fetchData() {
