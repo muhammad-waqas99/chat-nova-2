@@ -8,7 +8,33 @@ import { authenticateSocket } from "./middleware/authenticate.js";
 
 const PORT = Number(process.env.PORT) || 4000;
 
-const httpServer = createServer();
+const httpServer = createServer((req, res) => {
+  if (req.method === "GET" && req.url === "/health") {
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+    });
+
+    res.end(
+      JSON.stringify({
+        success: true,
+        message: "Socket server is healthy",
+      })
+    );
+
+    return;
+  }
+
+  res.writeHead(404, {
+    "Content-Type": "application/json",
+  });
+
+  res.end(
+    JSON.stringify({
+      success: false,
+      message: "Route not found",
+    })
+  );
+});
 
 const io = new Server(httpServer, {
   cors: {
